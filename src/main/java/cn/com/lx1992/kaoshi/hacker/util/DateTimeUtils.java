@@ -15,7 +15,7 @@ import java.time.format.FormatStyle;
  * @author luoxin
  * @version 2017-4-11
  */
-public class DateTimeUtil {
+public class DateTimeUtils {
     public static String format(LocalDateTime dateTime) {
         if (dateTime == null) {
             return null;
