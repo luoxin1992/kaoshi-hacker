@@ -5,12 +5,10 @@ package cn.com.lx1992.kaoshi.hacker.meta;
 
 /**
  * @author luoxin
- * @version 1.0
- * @created 2017-4-10
+ * @version 2017-4-10
  */
 public enum ResponseEnum {
-    OK(0, "成功"),
-    ;
+    OK(0, "成功"),;
 
     private Integer code;
     private String message;

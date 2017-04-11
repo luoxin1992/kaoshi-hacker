@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.lx1992.kaoshi.hacker.mapper.MetadataMapper">
+    <update id="update" parameterType="cn.com.lx1992.kaoshi.hacker.model.MetadataUpdateModel">
+        update tbl_metadata
+        set `gmt_modify` = now() , `value` = #{value}
+        where `key` = #{key} and `status` = 1
+    </update>
+</mapper>
