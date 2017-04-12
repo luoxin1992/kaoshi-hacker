@@ -17,10 +17,6 @@ public class UserUpdateModel implements Serializable {
      */
     private Integer id;
     /**
-     * 用户名
-     */
-    private String username;
-    /**
      * 密码
      */
     private String password;
@@ -39,14 +35,6 @@ public class UserUpdateModel implements Serializable {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getPassword() {

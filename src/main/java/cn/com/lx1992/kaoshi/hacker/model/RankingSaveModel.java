@@ -13,6 +13,10 @@ import java.io.Serializable;
  */
 public class RankingSaveModel implements Serializable {
     /**
+     * ID
+     */
+    private Integer id;
+    /**
      * 排名
      */
     private String rank;
@@ -28,6 +32,14 @@ public class RankingSaveModel implements Serializable {
      * 累计答题时间(秒)
      */
     private String time;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getRank() {
         return rank;

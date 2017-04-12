@@ -6,12 +6,16 @@ package cn.com.lx1992.kaoshi.hacker.model;
 import java.io.Serializable;
 
 /**
- * 成绩 保存
+ * 成绩单 保存
  *
  * @author luoxin
  * @version 2017-4-11
  */
 public class ScoreSaveModel implements Serializable {
+    /**
+     * ID
+     */
+    private Integer id;
     /**
      * 姓名
      */
@@ -28,6 +32,14 @@ public class ScoreSaveModel implements Serializable {
      * 用时
      */
     private String period;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

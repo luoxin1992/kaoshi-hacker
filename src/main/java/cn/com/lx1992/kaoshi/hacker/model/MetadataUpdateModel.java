@@ -6,7 +6,7 @@ package cn.com.lx1992.kaoshi.hacker.model;
 import java.io.Serializable;
 
 /**
- * 元数据 保存
+ * 元数据 更新
  *
  * @author luoxin
  * @version 2017-4-10
