@@ -25,9 +25,13 @@ public class UserUpdateModel implements Serializable {
      */
     private String password;
     /**
-     * Session
+     * Cookie "exam_psid"
      */
-    private String session;
+    private String cookie1;
+    /**
+     * Cookie "exam_currentuser"
+     */
+    private String cookie2;
 
     public Integer getId() {
         return id;
@@ -53,11 +57,19 @@ public class UserUpdateModel implements Serializable {
         this.password = password;
     }
 
-    public String getSession() {
-        return session;
+    public String getCookie1() {
+        return cookie1;
     }
 
-    public void setSession(String session) {
-        this.session = session;
+    public void setCookie1(String cookie1) {
+        this.cookie1 = cookie1;
+    }
+
+    public String getCookie2() {
+        return cookie2;
+    }
+
+    public void setCookie2(String cookie2) {
+        this.cookie2 = cookie2;
     }
 }

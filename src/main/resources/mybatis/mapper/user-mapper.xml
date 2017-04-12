@@ -12,14 +12,17 @@
         <if test="password != null">
             , `password` = #{password}
         </if>
-        <if test="session != null">
-            , `session` = #{session}
+        <if test="cookie1 != null">
+            , `cookie1` = #{cookie1}
+        </if>
+        <if test="cookie2 != null">
+            , `cookie2` = #{cookie2}
         </if>
         where id = #{id} and status = 1
     </update>
 
     <select id="query" parameterType="java.lang.Integer" resultType="cn.com.lx1992.kaoshi.hacker.model.UserQueryModel">
-        select `id`, `username`, `password`, `session`
+        select `id`, `username`, `password`, `cookie1`, `cookie2`
         from tbl_user
         where id = #{id} and status = 1
         limit 1
