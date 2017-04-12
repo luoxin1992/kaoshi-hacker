@@ -3,14 +3,15 @@
  */
 package cn.com.lx1992.kaoshi.hacker.service;
 
+import cn.com.lx1992.kaoshi.hacker.constant.MetadataKeyConstant;
 import cn.com.lx1992.kaoshi.hacker.constant.UrlConstant;
+import cn.com.lx1992.kaoshi.hacker.exception.BizException;
 import cn.com.lx1992.kaoshi.hacker.mapper.MetadataMapper;
 import cn.com.lx1992.kaoshi.hacker.mapper.RankingMapper;
-import cn.com.lx1992.kaoshi.hacker.meta.MetadataKeyEnum;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataUpdateModel;
 import cn.com.lx1992.kaoshi.hacker.model.RankingSaveModel;
-import cn.com.lx1992.kaoshi.hacker.util.DateTimeUtil;
-import cn.com.lx1992.kaoshi.hacker.util.HttpUtil;
+import cn.com.lx1992.kaoshi.hacker.util.DateTimeUtils;
+import cn.com.lx1992.kaoshi.hacker.util.HttpUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -42,45 +44,36 @@ public class RankingService {
      */
     @Transactional
     public void crawling() {
+        parseData(requestData());
+    }
+
+    private String requestData() {
+        logger.info("request ranking page");
         try {
-            parse(request());
-        } catch (Exception e) {
-            logger.error("crawling ranking failed", e);
+            return HttpUtils.execute(UrlConstant.RANKING, null).body().string();
+        } catch (IOException e) {
+            logger.error("request ranking page failed", e);
+            throw new BizException("爬取排行榜失败(请求错误)");
         }
     }
 
-    public void query(Integer limit) {
-        //查询最新完整榜单
-        //截取最前面limit条记录
-    }
-
-    /**
-     * 请求
-     */
-    private String request() throws Exception {
-        logger.info("request ranking page");
-        return HttpUtil.request(UrlConstant.RANKING);
-    }
-
-    /**
-     * 解析
-     */
-    private void parse(String data) {
+    private void parseData(String data) {
         //上榜人数
-        AtomicInteger count = new AtomicInteger();
+        AtomicInteger count = new AtomicInteger(0);
         //解析数据
         Document document = Jsoup.parse(data);
         Elements elements = document.body().select("table").first().select("tr");
-        //保存排行榜
         elements.parallelStream()
+                //跳过表头行
+                .skip(1)
                 .forEach((element) -> {
                     logger.info("parse ranking item {}", element.toString().replaceAll("\n", ""));
                     Elements item = element.select("td");
                     if (item.size() != 4) {
-                        //第一个item是表头，不包含td标签
                         logger.warn("ranking item size {} not correct", item.size());
                         return;
                     }
+                    //保存排行榜
                     RankingSaveModel model = new RankingSaveModel();
                     model.setRank(item.get(0).html());
                     model.setName(item.get(1).html());
@@ -92,10 +85,10 @@ public class RankingService {
                 });
         //更新元数据
         MetadataUpdateModel model = new MetadataUpdateModel();
-        model.setKey(MetadataKeyEnum.RANKING_LAST_CRAWLING.getKey());
-        model.setValue(DateTimeUtil.getNowStr());
+        model.setKey(MetadataKeyConstant.RANKING_LAST_CRAWLING);
+        model.setValue(DateTimeUtils.getNowStr());
         metadataMapper.update(model);
-        model.setKey(MetadataKeyEnum.RANKING_USER_COUNT.getKey());
+        model.setKey(MetadataKeyConstant.RANKING_COUNT);
         model.setValue(String.valueOf(count.get()));
         metadataMapper.update(model);
     }
