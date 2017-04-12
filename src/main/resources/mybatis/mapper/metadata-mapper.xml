@@ -8,4 +8,11 @@
         set `gmt_modify` = now() , `value` = #{value}
         where `key` = #{key} and `status` = 1
     </update>
+
+    <select id="query" parameterType="java.lang.String"
+            resultType="cn.com.lx1992.kaoshi.hacker.model.MetadataQueryModel">
+        select `id`, `key`, `value`
+        from tbl_metadata
+        where `key` = #{key} and status = 1
+    </select>
 </mapper>

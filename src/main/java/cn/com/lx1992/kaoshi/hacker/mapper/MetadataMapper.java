@@ -3,6 +3,7 @@
  */
 package cn.com.lx1992.kaoshi.hacker.mapper;
 
+import cn.com.lx1992.kaoshi.hacker.model.MetadataQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataUpdateModel;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -18,4 +19,9 @@ public interface MetadataMapper {
      * 更新
      */
     int update(MetadataUpdateModel model);
+
+    /**
+     * 查询
+     */
+    MetadataQueryModel query(String key);
 }
