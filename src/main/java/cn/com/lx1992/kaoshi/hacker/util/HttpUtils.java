@@ -9,6 +9,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Map;
@@ -35,11 +36,11 @@ public class HttpUtils {
     }
 
     private static Request request(String url, Map<String, String> cookies) {
+        //随机使用iOS或Android的UA
+        String userAgent = Math.random() > 0.5 ? HttpHeaderConstant.UA_IOS : HttpHeaderConstant.UA_ANDROID;
         Request.Builder builder = new Request.Builder()
                 .url(url)
-                //随机使用iOS或Android的UA
-                .addHeader("User-Agent", Math.random() > 0.5 ? HttpHeaderConstant.UA_IOS : HttpHeaderConstant
-                        .UA_ANDROID)
+                .addHeader("User-Agent", userAgent)
                 .addHeader("Accept", HttpHeaderConstant.ACCEPT)
                 .addHeader("Accept-Language", HttpHeaderConstant.ACCEPT_LANGUAGE)
                 .get();
@@ -59,19 +60,8 @@ public class HttpUtils {
      * @param cookies Cookies
      * @return HTTP响应
      */
-    public static Response execute(String url, Map<String, String> cookies) throws Exception {
+    public static Response execute(String url, Map<String, String> cookies) throws IOException {
         Request request = request(url, cookies);
         return client.newCall(request).execute();
-    }
-
-    /**
-     * 获取HTTP状态码
-     *
-     * @param url     URL
-     * @param cookies Cookies
-     * @return HTTP状态码
-     */
-    public static String body(String url, Map<String, String> cookies) throws Exception {
-        return execute(url, cookies).body().string();
     }
 }
