@@ -11,19 +11,23 @@ package cn.com.lx1992.kaoshi.hacker.constant;
  */
 public class UrlConstant {
     /**
+     * URL前缀
+     */
+    public static final String PREFIX = "http://www.aohua168.com/kaoshi";
+    /**
      * 排行榜
      */
-    public static final String RANKING = "http://www.aohua168.com/kaoshi/rank-phone.php";
-    /**
-     * 考试首页
-     */
-    public static final String EXAM_INDEX = "http://www.aohua168.com/kaoshi/index.php?exam-phone-index";
+    public static final String RANKING = PREFIX + "/rank-phone.php";
     /**
      * 用户登录
      */
-    public static final String USER_LOGIN = "http://www.aohua168.com/kaoshi/index.php?user-phone-login";
+    public static final String USER_LOGIN = PREFIX + "/index.php?user-phone-login";
     /**
      * 用户登出
      */
-    public static final String USER_LOGOUT = "http://www.aohua168.com/kaoshi/index.php?user-phone-logout";
+    public static final String USER_LOGOUT = PREFIX + "/index.php?user-phone-logout";
+    /**
+     * 成绩单
+     */
+    public static final String SCORE = PREFIX + "/index.php?exam-phone-score";
 }
