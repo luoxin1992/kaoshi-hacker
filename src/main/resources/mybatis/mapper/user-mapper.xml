@@ -6,9 +6,6 @@
     <update id="update" parameterType="cn.com.lx1992.kaoshi.hacker.model.UserUpdateModel">
         update tbl_user
         set `gmt_modify` = now()
-        <if test="username != null">
-            , `username` = #{username}
-        </if>
         <if test="password != null">
             , `password` = #{password}
         </if>

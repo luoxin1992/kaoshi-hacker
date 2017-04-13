@@ -4,7 +4,6 @@
 package cn.com.lx1992.kaoshi.hacker.util;
 
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -30,11 +29,20 @@ public class DateTimeUtils {
         return LocalDateTime.parse(dateTime, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
     }
 
-    public static String getTodayStr() {
-        return LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM));
+    public static LocalDateTime getNow() {
+        return LocalDateTime.now();
     }
 
     public static String getNowStr() {
-        return LocalDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+        return getNow().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+    }
+
+    public static boolean before(LocalDateTime time1, LocalDateTime time2) {
+        return time1.isBefore(time2);
+    }
+
+    public static boolean after(LocalDateTime time1, LocalDateTime time2) {
+        //equal视为after
+        return !before(time1, time2);
     }
 }
