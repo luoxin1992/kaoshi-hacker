@@ -21,6 +21,18 @@ public class QuestionQueryModel implements Serializable {
      */
     private Integer questionId;
     /**
+     * 题干
+     */
+    private String stem;
+    /**
+     * 选项
+     */
+    private String option;
+    /**
+     * 答案
+     */
+    private String answer;
+    /**
      * 选A考生数
      */
     private Integer aChooser;
@@ -59,6 +71,30 @@ public class QuestionQueryModel implements Serializable {
 
     public void setQuestionId(Integer questionId) {
         this.questionId = questionId;
+    }
+
+    public String getStem() {
+        return stem;
+    }
+
+    public void setStem(String stem) {
+        this.stem = stem;
+    }
+
+    public String getOption() {
+        return option;
+    }
+
+    public void setOption(String option) {
+        this.option = option;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
     }
 
     public Integer getaChooser() {

@@ -30,4 +30,8 @@ public class UrlConstant {
      * 成绩单
      */
     public static final String SCORE = PREFIX + "/index.php?exam-phone-score";
+    /**
+     * 试卷解析
+     */
+    public static final String PAPER = PREFIX + "/index.php?exam-phone-history-view";
 }

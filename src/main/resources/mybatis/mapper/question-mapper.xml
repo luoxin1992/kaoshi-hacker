@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.lx1992.kaoshi.hacker.mapper.QuestionMapper">
+    <insert id="save" parameterType="cn.com.lx1992.kaoshi.hacker.model.QuestionSaveModel" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into tbl_question(`question_id`, `stem`, `option`, `answer`, `gmt_create`, `gmt_modify`)
+        values(#{questionId}, #{stem}, #{option}, #{answer}, now(), now())
+    </insert>
+
+    <update id="update" parameterType="cn.com.lx1992.kaoshi.hacker.model.QuestionUpdateModel">
+        update tbl_question
+        set `gmt_modify` = now()
+        <if test="aChooser != null">
+            , `a_chooser` = #{aChooser}
+        </if>
+        <if test="bChooser != null">
+            , `b_chooser` = #{bChooser}
+        </if>
+        <if test="cChooser != null">
+            , `c_chooser` = #{cChooser}
+        </if>
+        <if test="dChooser != null">
+            , `d_chooser` = #{dChooser}
+        </if>
+        <if test="correctRate != null">
+            , `correct_rate` = #{correctRate}
+        </if>
+        <if test="selectTimes != null">
+            , `select_times` = #{selectTimes}
+        </if>
+        where `id` = #{id} and `status` = 1
+    </update>
+
+    <select id="query" parameterType="java.lang.Integer"
+            resultType="cn.com.lx1992.kaoshi.hacker.model.QuestionQueryModel">
+        select `id`, `question_id` as `questionId`, `stem`, `option`, `answer`,
+            `a_chooser` as `aChooser`, `b_chooser` as `bChooser`, `c_chooser` as `cChooser`, `d_chooser` as `dChooser`,
+            `correct_rate` as `correctRate`, `select_times` as `selectTimes`
+        from tbl_question
+        where `id` = #{id} and `status` = 1
+        limit 1
+    </select>
+
+    <select id="queryId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select `id`
+        from tbl_question
+        where `question_id` = #{questionId} and `status` = 1
+        limit 1
+    </select>
+</mapper>
