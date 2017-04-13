@@ -70,7 +70,7 @@ public class RankingService {
                     logger.info("parse ranking item {}", element.toString().replaceAll("\n", ""));
                     Elements item = element.select("td");
                     if (item.size() != 4) {
-                        logger.warn("ranking item size {} not correct", item.size());
+                        logger.warn("ranking item size {} incorrect", item.size());
                         return;
                     }
                     //保存排行榜

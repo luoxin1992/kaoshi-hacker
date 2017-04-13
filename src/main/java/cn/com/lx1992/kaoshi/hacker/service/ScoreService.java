@@ -12,6 +12,7 @@ import cn.com.lx1992.kaoshi.hacker.mapper.ScoreMapper;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataUpdateModel;
 import cn.com.lx1992.kaoshi.hacker.model.ScoreSaveModel;
+import cn.com.lx1992.kaoshi.hacker.util.CommonUtils;
 import cn.com.lx1992.kaoshi.hacker.util.DateTimeUtils;
 import cn.com.lx1992.kaoshi.hacker.util.HttpUtils;
 import okhttp3.Response;
@@ -27,8 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 /**
@@ -56,35 +55,41 @@ public class ScoreService {
     public void crawling() {
         //成绩单只需增量更新 查询上次爬取的时间和记录数
         MetadataQueryModel metadataQuery;
-        metadataQuery = metadataMapper.query(MetadataKeyConstant.SCORE_LAST_CRAWLING);
-        String last = metadataQuery.getValue();
+        metadataQuery = metadataMapper.query(MetadataKeyConstant.SCORE_LAST_CRAWLING_START);
+        String start = metadataQuery.getValue();
         metadataQuery = metadataMapper.query(MetadataKeyConstant.SCORE_COUNT);
         AtomicInteger count = new AtomicInteger(Integer.parseInt(metadataQuery.getValue()));
+        //记录爬取开始时间
+        MetadataUpdateModel metadataUpdate = new MetadataUpdateModel();
+        metadataUpdate.setKey(MetadataKeyConstant.SCORE_LAST_CRAWLING_START);
+        metadataUpdate.setValue(DateTimeUtils.getNowStr());
+        metadataMapper.update(metadataUpdate);
         //先爬取第一页
         String data = requestData(1);
-        parseScore(data, last, count);
+        parseScore(data, start, count);
         //解析页码 继续爬第2~N页
         int number = parsePageNumber(data);
         if (number > 1) {
             IntStream pages = IntStream.rangeClosed(2, number);
-            pages.parallel()
-                    .forEach((page) -> {
-                        parseScore(requestData(page), last, count);
-                        try {
-                            //每爬取一页随机休眠10~20秒
-                            Thread.sleep((long) (Math.random() * 10000 + 10000));
-                        } catch (InterruptedException ignored) {
-                        }
-                    });
+            //并行请求存在BUG
+            //若cookie突然失效 多个线程同时发起登录 得到多个新的cookie(但仅只有1个是有效的)
+            //且更新cookie字段和其他操作位于同一个事务中 在爬取流程完成之前不会提交 导致死锁
+            pages.forEach((page) -> {
+                try {
+                    //每爬取一页随机休眠0~10秒
+                    Thread.sleep((long) (Math.random() * 10000));
+                } catch (InterruptedException ignored) {
+                }
+                parseScore(requestData(page), start, count);
+            });
         }
-        //更新元数据
-        MetadataUpdateModel MetadataUpdate = new MetadataUpdateModel();
-        MetadataUpdate.setKey(MetadataKeyConstant.SCORE_LAST_CRAWLING);
-        MetadataUpdate.setValue(DateTimeUtils.getNowStr());
-        metadataMapper.update(MetadataUpdate);
-        MetadataUpdate.setKey(MetadataKeyConstant.SCORE_COUNT);
-        MetadataUpdate.setValue(String.valueOf(count.get()));
-        metadataMapper.update(MetadataUpdate);
+        //记录爬取结束时间和爬取记录数
+        metadataUpdate.setKey(MetadataKeyConstant.SCORE_LAST_CRAWLING_END);
+        metadataUpdate.setValue(DateTimeUtils.getNowStr());
+        metadataMapper.update(metadataUpdate);
+        metadataUpdate.setKey(MetadataKeyConstant.SCORE_COUNT);
+        metadataUpdate.setValue(String.valueOf(count.get()));
+        metadataMapper.update(metadataUpdate);
     }
 
     private String requestData(int page) {
@@ -100,7 +105,7 @@ public class ScoreService {
             while (response.isRedirect()) {
                 logger.info("session invalid, try re-login");
                 try {
-                    Thread.sleep((long) (Math.random() * 10000));
+                    Thread.sleep((long) (Math.random() * 5000));
                 } catch (InterruptedException ignored) {
                 }
                 userService.login(CommonConstant.CRAWLING_USER_ID);
@@ -117,7 +122,7 @@ public class ScoreService {
     /**
      * 解析成绩数据
      */
-    private void parseScore(String data, String last, AtomicInteger count) {
+    private void parseScore(String data, String start, AtomicInteger count) {
         Document document = Jsoup.parse(data);
         Elements elements = document.body().select("table").first().select("tr");
         elements.parallelStream()
@@ -129,14 +134,15 @@ public class ScoreService {
                         logger.warn("score item size {} incorrect", item.size());
                         return;
                     }
-                    if (last.compareTo(item.get(3).html()) > 0) {
+                    //只需要爬取时间早于上次爬取的成绩
+                    if (DateTimeUtils.after(DateTimeUtils.parse(item.get(3).html()), DateTimeUtils.parse(start))) {
                         ScoreSaveModel scoreSave = new ScoreSaveModel();
                         scoreSave.setName(item.get(1).html());
                         scoreSave.setScore(item.get(2).html());
                         scoreSave.setTime(item.get(3).html());
                         //页面上的"用时"格式为"XX秒"或"XX分" 爬取时统一用秒 去掉文字单位
                         String periodStr = item.get(4).html();
-                        int periodNum = matchNumber(periodStr);
+                        int periodNum = CommonUtils.extractNumber(periodStr);
                         if (periodStr.contains("分钟")) {
                             periodNum *= 60;
                         }
@@ -155,21 +161,8 @@ public class ScoreService {
         //获取分页菜单的最后一个链接("末页")的地址
         String href = document.getElementsByClass("pagination pull-right").select("a").last().attr("href");
         //该地址唯一的数字即是最后一页的页码
-        int number = matchNumber(href);
+        int number = CommonUtils.extractNumber(href);
         logger.info("score total page(s) {}", number);
         return number;
-    }
-
-    /**
-     * 从字符串中匹配数字
-     */
-    private int matchNumber(String str) {
-        Pattern pattern = Pattern.compile("\\d+");
-        Matcher matcher = pattern.matcher(str);
-        if (!matcher.find()) {
-            logger.warn("mismatch number from str {}", str);
-            return -1;
-        }
-        return Integer.parseInt(matcher.group());
     }
 }
