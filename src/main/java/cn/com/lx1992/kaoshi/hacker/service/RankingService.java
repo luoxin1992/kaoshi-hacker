@@ -5,9 +5,9 @@ package cn.com.lx1992.kaoshi.hacker.service;
 
 import cn.com.lx1992.kaoshi.hacker.constant.MetadataKeyConstant;
 import cn.com.lx1992.kaoshi.hacker.constant.UrlConstant;
-import cn.com.lx1992.kaoshi.hacker.exception.BizException;
 import cn.com.lx1992.kaoshi.hacker.mapper.MetadataMapper;
 import cn.com.lx1992.kaoshi.hacker.mapper.RankingMapper;
+import cn.com.lx1992.kaoshi.hacker.model.MetadataQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataUpdateModel;
 import cn.com.lx1992.kaoshi.hacker.model.RankingSaveModel;
 import cn.com.lx1992.kaoshi.hacker.util.DateTimeUtils;
@@ -53,17 +53,19 @@ public class RankingService {
             return HttpUtils.execute(UrlConstant.RANKING, null).body().string();
         } catch (IOException e) {
             logger.error("request ranking page failed", e);
-            throw new BizException("爬取排行榜失败(请求错误)");
+            throw new RuntimeException("爬取排行榜失败(请求错误)");
         }
     }
 
     private void parseData(String data) {
         //上榜人数
         AtomicInteger count = new AtomicInteger(0);
+        //爬取轮次
+        MetadataQueryModel metadataQuery = metadataMapper.query(MetadataKeyConstant.RANKING_NEXT_ROUND);
         //解析数据
         Document document = Jsoup.parse(data);
         Elements elements = document.body().select("table").first().select("tr");
-        elements.parallelStream()
+        elements.stream()
                 //跳过表头行
                 .skip(1)
                 .forEach((element) -> {
@@ -74,22 +76,28 @@ public class RankingService {
                         return;
                     }
                     //保存排行榜
-                    RankingSaveModel model = new RankingSaveModel();
-                    model.setRank(item.get(0).html());
-                    model.setName(item.get(1).html());
-                    model.setScore(item.get(2).html());
-                    model.setTime(item.get(3).html());
-                    rankingMapper.save(model);
+                    RankingSaveModel rankingSave = new RankingSaveModel();
+                    rankingSave.setRound(Integer.valueOf(metadataQuery.getValue()));
+                    rankingSave.setRank(item.get(0).html());
+                    rankingSave.setName(item.get(1).html());
+                    rankingSave.setScore(item.get(2).html());
+                    rankingSave.setTime(item.get(3).html());
+                    rankingMapper.save(rankingSave);
+                    logger.info("save ranking item {}", rankingSave.getId());
                     //上榜人数自增
                     count.incrementAndGet();
                 });
+        logger.info("parse {} ranking item(s) successfully", count.get());
         //更新元数据
-        MetadataUpdateModel model = new MetadataUpdateModel();
-        model.setKey(MetadataKeyConstant.RANKING_LAST_CRAWLING);
-        model.setValue(DateTimeUtils.getNowStr());
-        metadataMapper.update(model);
-        model.setKey(MetadataKeyConstant.RANKING_COUNT);
-        model.setValue(String.valueOf(count.get()));
-        metadataMapper.update(model);
+        MetadataUpdateModel metadataUpdate = new MetadataUpdateModel();
+        metadataUpdate.setKey(MetadataKeyConstant.RANKING_LAST_CRAWLING);
+        metadataUpdate.setValue(DateTimeUtils.getNowStr());
+        metadataMapper.update(metadataUpdate);
+        metadataUpdate.setKey(MetadataKeyConstant.RANKING_COUNT);
+        metadataUpdate.setValue(String.valueOf(count.get()));
+        metadataMapper.update(metadataUpdate);
+        metadataUpdate.setKey(MetadataKeyConstant.RANKING_NEXT_ROUND);
+        metadataUpdate.setValue(String.valueOf(Integer.parseInt(metadataQuery.getValue()) + 1));
+        metadataMapper.update(metadataUpdate);
     }
 }

@@ -17,6 +17,10 @@ public class RankingSaveModel implements Serializable {
      */
     private Integer id;
     /**
+     * 爬取轮次
+     */
+    private Integer round;
+    /**
      * 排名
      */
     private String rank;
@@ -39,6 +43,14 @@ public class RankingSaveModel implements Serializable {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Integer getRound() {
+        return round;
+    }
+
+    public void setRound(Integer round) {
+        this.round = round;
     }
 
     public String getRank() {

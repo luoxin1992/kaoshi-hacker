@@ -5,7 +5,15 @@
 <mapper namespace="cn.com.lx1992.kaoshi.hacker.mapper.RankingMapper">
     <insert id="save" parameterType="cn.com.lx1992.kaoshi.hacker.model.RankingSaveModel" useGeneratedKeys="true"
             keyProperty="id">
-        insert into tbl_ranking(`rank`, `name`, `score`, `time`, `gmt_create`, `gmt_modify`)
-        values (#{rank}, #{name}, #{score}, #{time}, now(), now())
+        insert into tbl_ranking(`round`, `rank`, `name`, `score`, `time`, `gmt_create`, `gmt_modify`)
+        values (#{round}, #{rank}, #{name}, #{score}, #{time}, now(), now())
     </insert>
+
+    <select id="compare" parameterType="java.lang.String"
+            resultType="cn.com.lx1992.kaoshi.hacker.model.RankingCompareModel">
+        select `id`, `name`, `rank`, `score`, `time`
+        from tbl_ranking
+        where `name` = #{name} and `status` = 1
+        order by `id`
+    </select>
 </mapper>

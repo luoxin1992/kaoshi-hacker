@@ -19,6 +19,10 @@ public class MetadataKeyConstant {
      */
     public static final String RANKING_COUNT = "ranking_count";
     /**
+     * 下次爬取轮次
+     */
+    public static final String RANKING_NEXT_ROUND = "ranking_next_round";
+    /**
      * 成绩单最后爬取开始时间
      */
     public static final String SCORE_LAST_CRAWLING_START = "score_last_crawling_start";
