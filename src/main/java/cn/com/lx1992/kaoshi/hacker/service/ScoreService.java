@@ -6,7 +6,6 @@ package cn.com.lx1992.kaoshi.hacker.service;
 import cn.com.lx1992.kaoshi.hacker.constant.CommonConstant;
 import cn.com.lx1992.kaoshi.hacker.constant.MetadataKeyConstant;
 import cn.com.lx1992.kaoshi.hacker.constant.UrlConstant;
-import cn.com.lx1992.kaoshi.hacker.exception.BizException;
 import cn.com.lx1992.kaoshi.hacker.mapper.MetadataMapper;
 import cn.com.lx1992.kaoshi.hacker.mapper.ScoreMapper;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataQueryModel;
@@ -115,7 +114,7 @@ public class ScoreService {
             return response.body().string();
         } catch (IOException e) {
             logger.error("request score page failed", e);
-            throw new BizException("爬取成绩单失败(请求错误)");
+            throw new RuntimeException("爬取成绩单失败(请求错误)");
         }
     }
 

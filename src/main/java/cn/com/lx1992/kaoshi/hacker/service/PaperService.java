@@ -6,7 +6,6 @@ package cn.com.lx1992.kaoshi.hacker.service;
 import cn.com.lx1992.kaoshi.hacker.constant.CommonConstant;
 import cn.com.lx1992.kaoshi.hacker.constant.MetadataKeyConstant;
 import cn.com.lx1992.kaoshi.hacker.constant.UrlConstant;
-import cn.com.lx1992.kaoshi.hacker.exception.BizException;
 import cn.com.lx1992.kaoshi.hacker.mapper.MetadataMapper;
 import cn.com.lx1992.kaoshi.hacker.mapper.PaperMapper;
 import cn.com.lx1992.kaoshi.hacker.mapper.QuestionMapper;
@@ -83,8 +82,8 @@ public class PaperService {
             ConcurrentHashMap<Integer, String> result = parsePaper(requestData(id));
             if (!CollectionUtils.isEmpty(result)) {
                 analysisPaper(id, result);
-                count.incrementAndGet();
             }
+            count.incrementAndGet();
             try {
                 //每爬取一份随机休眠0~10秒
                 Thread.sleep((long) (Math.random() * 10000));
@@ -120,7 +119,7 @@ public class PaperService {
             return response.body().string();
         } catch (IOException e) {
             logger.error("request paper page failed", e);
-            throw new BizException("爬取试卷失败(请求错误)");
+            throw new RuntimeException("爬取试卷失败(请求错误)");
         }
     }
 

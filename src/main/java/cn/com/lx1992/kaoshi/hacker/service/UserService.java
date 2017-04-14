@@ -4,8 +4,6 @@
 package cn.com.lx1992.kaoshi.hacker.service;
 
 import cn.com.lx1992.kaoshi.hacker.constant.UrlConstant;
-import cn.com.lx1992.kaoshi.hacker.exception.BizException;
-import cn.com.lx1992.kaoshi.hacker.mapper.MetadataMapper;
 import cn.com.lx1992.kaoshi.hacker.mapper.UserMapper;
 import cn.com.lx1992.kaoshi.hacker.model.UserQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.UserUpdateModel;
@@ -39,13 +37,9 @@ public class UserService {
 
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private MetadataMapper metadataMapper;
-
 
     /**
-     * 登录 返回会话session
-     * 不会事先检查session是否失效 有需要请调用check()方法
+     * 登录
      */
     @Transactional
     public void login(Integer id) {
@@ -58,18 +52,18 @@ public class UserService {
             response = HttpUtils.execute(url, null);
         } catch (IOException e) {
             logger.error("request login page failed", e);
-            throw new BizException("登录失败(请求错误)");
+            throw new RuntimeException("登录失败(请求错误)");
         }
         //登录成功 重定向到考试首页
         if (!response.isRedirect()) {
             logger.error("login failed");
-            throw new BizException("登录失败(页面跳转错误)");
+            throw new RuntimeException("登录失败(页面跳转错误)");
         }
         //获取cookies 正常应当是3个 取第2个存为cookie1 第3个存为cookie2
         List<String> cookies = response.headers("Set-Cookie");
         if (cookies.size() != 3) {
             logger.error("header \"Set-cookie\" size {} incorrect", cookies.size());
-            throw new BizException("登录失败(获取Cookie错误)");
+            throw new RuntimeException("登录失败(获取cookie错误)");
         }
         String cookie1 = cookies.get(1).substring(cookies.get(1).indexOf('=') + 1, cookies.get(1).indexOf(';'));
         String cookie2 = cookies.get(2).substring(cookies.get(2).indexOf('=') + 1, cookies.get(2).indexOf(';'));
@@ -101,12 +95,12 @@ public class UserService {
                 response = HttpUtils.execute(UrlConstant.USER_LOGOUT, cookies);
             } catch (IOException e) {
                 logger.error("request logout page failed", e);
-                throw new BizException("登出失败(请求错误)");
+                throw new RuntimeException("登出失败(请求错误)");
             }
             //登出成功 重定向到登录页
             if (!response.isRedirect()) {
-                logger.warn("logout failed");
-                throw new BizException("登出失败(页面跳转错误)");
+                logger.error("logout failed");
+                throw new RuntimeException("登出失败(页面跳转错误)");
             }
         }
         //更新数据库 清空cookie
@@ -125,7 +119,7 @@ public class UserService {
         UserQueryModel userQuery = userMapper.query(id);
         if (userQuery == null) {
             logger.error("user not exist");
-            throw new BizException("用户不存在");
+            throw new RuntimeException("用户不存在");
         }
         return userQuery;
     }
