@@ -58,11 +58,13 @@ public class ScoreService {
         String start = metadataQuery.getValue();
         metadataQuery = metadataMapper.query(MetadataKeyConstant.SCORE_COUNT);
         AtomicInteger count = new AtomicInteger(Integer.parseInt(metadataQuery.getValue()));
+        logger.info("already crawled {} score item(s) before {}", count.get(), start);
         //记录爬取开始时间
         MetadataUpdateModel metadataUpdate = new MetadataUpdateModel();
         metadataUpdate.setKey(MetadataKeyConstant.SCORE_LAST_CRAWLING_START);
         metadataUpdate.setValue(DateTimeUtils.getNowStr());
         metadataMapper.update(metadataUpdate);
+
         //先爬取第一页
         String data = requestData(1);
         parseScore(data, start, count);
@@ -75,13 +77,15 @@ public class ScoreService {
             //且更新cookie字段和其他操作位于同一个事务中 在爬取流程完成之前不会提交 导致死锁
             pages.forEach((page) -> {
                 try {
-                    //每爬取一页随机休眠0~10秒
-                    Thread.sleep((long) (Math.random() * 10000));
+                    //每爬取一页随机休眠0~3秒
+                    Thread.sleep((long) (Math.random() * 3000));
                 } catch (InterruptedException ignored) {
                 }
                 parseScore(requestData(page), start, count);
             });
         }
+        logger.info("parse {} score item(s) successfully", count.get());
+
         //记录爬取结束时间和爬取记录数
         metadataUpdate.setKey(MetadataKeyConstant.SCORE_LAST_CRAWLING_END);
         metadataUpdate.setValue(DateTimeUtils.getNowStr());
@@ -124,7 +128,7 @@ public class ScoreService {
     private void parseScore(String data, String start, AtomicInteger count) {
         Document document = Jsoup.parse(data);
         Elements elements = document.body().select("table").first().select("tr");
-        elements.parallelStream()
+        elements.stream()
                 .skip(1)
                 .forEach((element -> {
                     logger.info("parse score item {}", element.toString().replaceAll("\n", ""));
@@ -134,21 +138,24 @@ public class ScoreService {
                         return;
                     }
                     //只需要爬取时间早于上次爬取的成绩
-                    if (DateTimeUtils.after(DateTimeUtils.parse(item.get(3).html()), DateTimeUtils.parse(start))) {
-                        ScoreSaveModel scoreSave = new ScoreSaveModel();
-                        scoreSave.setName(item.get(1).html());
-                        scoreSave.setScore(item.get(2).html());
-                        scoreSave.setTime(item.get(3).html());
-                        //页面上的"用时"格式为"XX秒"或"XX分" 爬取时统一用秒 去掉文字单位
-                        String periodStr = item.get(4).html();
-                        int periodNum = CommonUtils.extractNumber(periodStr);
-                        if (periodStr.contains("分钟")) {
-                            periodNum *= 60;
-                        }
-                        scoreSave.setPeriod(String.valueOf(periodNum));
-                        scoreMapper.save(scoreSave);
-                        count.incrementAndGet();
+                    if (DateTimeUtils.before(DateTimeUtils.parse(item.get(3).html()), DateTimeUtils.parse(start))) {
+                        logger.warn("score item with time {} already crawled", item.get(3).html());
+                        return;
                     }
+                    ScoreSaveModel scoreSave = new ScoreSaveModel();
+                    scoreSave.setName(item.get(1).html());
+                    scoreSave.setScore(item.get(2).html());
+                    scoreSave.setTime(item.get(3).html());
+                    //页面上的"用时"格式为"XX秒"或"XX分" 爬取时统一用秒 去掉文字单位
+                    String periodStr = item.get(4).html();
+                    int periodNum = CommonUtils.extractNumber(periodStr);
+                    if (periodStr.contains("分钟")) {
+                        periodNum *= 60;
+                    }
+                    scoreSave.setPeriod(String.valueOf(periodNum));
+                    scoreMapper.save(scoreSave);
+                    logger.info("save score item {}", scoreSave.getId());
+                    count.incrementAndGet();
                 }));
     }
 
