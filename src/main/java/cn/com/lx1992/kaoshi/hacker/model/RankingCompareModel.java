@@ -15,7 +15,7 @@ public class RankingCompareModel implements Serializable {
     /**
      * ID
      */
-    private Integer id;
+    private Integer round;
     /**
      * 姓名
      */
@@ -23,22 +23,22 @@ public class RankingCompareModel implements Serializable {
     /**
      * 排名
      */
-    private Integer rank;
+    private String rank;
     /**
      * 累计得分
      */
-    private Integer score;
+    private String score;
     /**
      * 累计答题时间
      */
-    private Integer time;
+    private String time;
 
-    public Integer getId() {
-        return id;
+    public Integer getRound() {
+        return round;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setRound(Integer round) {
+        this.round = round;
     }
 
     public String getName() {
@@ -49,27 +49,35 @@ public class RankingCompareModel implements Serializable {
         this.name = name;
     }
 
-    public Integer getRank() {
+    public String getRank() {
         return rank;
     }
 
-    public void setRank(Integer rank) {
+    public void setRank(String rank) {
         this.rank = rank;
     }
 
-    public Integer getScore() {
+    public String getScore() {
         return score;
     }
 
-    public void setScore(Integer score) {
+    public void setScore(String score) {
         this.score = score;
     }
 
-    public Integer getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(Integer time) {
+    public void setTime(String time) {
         this.time = time;
+    }
+
+    public static RankingCompareModel buildNull() {
+        RankingCompareModel model = new RankingCompareModel();
+        model.setRank("-");
+        model.setScore("-");
+        model.setTime("-");
+        return model;
     }
 }

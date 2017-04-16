@@ -3,8 +3,13 @@
  */
 package cn.com.lx1992.kaoshi.hacker.mapper;
 
+import cn.com.lx1992.kaoshi.hacker.model.RankingCompareModel;
+import cn.com.lx1992.kaoshi.hacker.model.RankingQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.RankingSaveModel;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 排行榜Mapper
@@ -18,4 +23,14 @@ public interface RankingMapper {
      * 保存
      */
     int save(RankingSaveModel model);
+
+    /**
+     * 查询
+     */
+    List<RankingQueryModel> query(@Param("round") int round, @Param("limit") int limit);
+
+    /**
+     * 对比
+     */
+    List<RankingCompareModel> compare(String name);
 }

@@ -6,7 +6,7 @@ package cn.com.lx1992.kaoshi.hacker.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -17,7 +17,7 @@ import java.util.Map;
 public class TestController {
     @RequestMapping("/api/v1/test")
     public Map<String, Object> test() {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = new LinkedHashMap<>();
         result.put("code", "0");
         result.put("message", "成功");
         result.put("data", null);

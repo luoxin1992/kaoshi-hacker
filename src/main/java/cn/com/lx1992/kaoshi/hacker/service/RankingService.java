@@ -9,6 +9,7 @@ import cn.com.lx1992.kaoshi.hacker.mapper.MetadataMapper;
 import cn.com.lx1992.kaoshi.hacker.mapper.RankingMapper;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataUpdateModel;
+import cn.com.lx1992.kaoshi.hacker.model.RankingCompareModel;
 import cn.com.lx1992.kaoshi.hacker.model.RankingSaveModel;
 import cn.com.lx1992.kaoshi.hacker.util.DateTimeUtils;
 import cn.com.lx1992.kaoshi.hacker.util.HttpUtils;
@@ -20,9 +21,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * 排行榜
@@ -45,6 +52,56 @@ public class RankingService {
     @Transactional
     public void crawling() {
         parseData(requestData());
+    }
+
+    /**
+     * 查询
+     */
+    public Map<String, Object> query(Integer limit) {
+        logger.info("query ranking in top {}", limit == null ? "[all]" : limit);
+        Map<String, Object> result = new LinkedHashMap<>();
+        //排行榜更新时间
+        result.put("timestamp", metadataMapper.query(MetadataKeyConstant.RANKING_LAST_CRAWLING).getValue());
+        //排行榜
+        int round = Integer.parseInt(metadataMapper.query(MetadataKeyConstant.RANKING_NEXT_ROUND).getValue()) - 1;
+        if (limit == null) {
+            limit = Integer.valueOf(metadataMapper.query(MetadataKeyConstant.RANKING_COUNT).getValue());
+        }
+        result.put("ranking", rankingMapper.query(round, limit));
+        return result;
+    }
+
+    /**
+     * 比较
+     */
+    public Map<String, Object> compare(String name) {
+        logger.info("compare ranking for {}", name);
+        List<RankingCompareModel> models = rankingMapper.compare(name);
+        if (CollectionUtils.isEmpty(models)) {
+            logger.warn("compare result is empty");
+            return null;
+        }
+        //排行榜爬取累计次数 填充未上榜数据
+        Map<Integer, RankingCompareModel> modelMap = new HashMap<>();
+        int round = Integer.parseInt(metadataMapper.query(MetadataKeyConstant.RANKING_NEXT_ROUND).getValue());
+        for (int i = 1; i < round; i++) {
+            modelMap.put(i, RankingCompareModel.buildNull());
+        }
+        for (RankingCompareModel model : models) {
+            modelMap.replace(model.getRound(), model);
+        }
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("name", models.get(0).getName());
+        result.put("rank", modelMap.values().stream()
+                .map(RankingCompareModel::getRank)
+                .collect(Collectors.joining(",", "[", "]")));
+        result.put("score", modelMap.values().stream()
+                .map(RankingCompareModel::getScore)
+                .collect(Collectors.joining(",", "[", "]")));
+        result.put("time", modelMap.values().stream()
+                .map(RankingCompareModel::getTime)
+                .collect(Collectors.joining(",", "[", "]")));
+        return result;
     }
 
     private String requestData() {

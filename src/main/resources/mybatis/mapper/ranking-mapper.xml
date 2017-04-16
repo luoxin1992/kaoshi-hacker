@@ -9,11 +9,18 @@
         values (#{round}, #{rank}, #{name}, #{score}, #{time}, now(), now())
     </insert>
 
+    <select id="query" resultType="cn.com.lx1992.kaoshi.hacker.model.RankingQueryModel">
+        select `name`, `score`, `time`
+        from tbl_ranking
+        where `round` = #{round} and `status` = 1
+        order by `score`+0 desc, `time` asc
+        limit #{limit}
+    </select>
+
     <select id="compare" parameterType="java.lang.String"
             resultType="cn.com.lx1992.kaoshi.hacker.model.RankingCompareModel">
-        select `id`, `name`, `rank`, `score`, `time`
+        select `round`, `rank`, `name`, `score`, `time`
         from tbl_ranking
         where `name` = #{name} and `status` = 1
-        order by `id`
     </select>
 </mapper>
