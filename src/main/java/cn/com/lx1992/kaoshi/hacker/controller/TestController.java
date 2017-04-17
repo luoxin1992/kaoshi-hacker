@@ -20,7 +20,7 @@ public class TestController {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("code", "0");
         result.put("message", "成功");
-        result.put("data", null);
+        result.put("result", null);
         return result;
     }
 }

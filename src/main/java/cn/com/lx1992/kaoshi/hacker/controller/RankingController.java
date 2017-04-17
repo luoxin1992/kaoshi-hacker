@@ -26,16 +26,16 @@ public class RankingController {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("code", "0");
         result.put("message", "成功");
-        result.put("data", rankingService.compare(name));
+        result.put("result", rankingService.compare(name));
         return result;
     }
 
     @RequestMapping({"/api/v1/ranking", "/api/v1/ranking/{limit}"})
-    public Map<String, Object> query(@PathVariable(value = "limit", required = false) Integer limit) {
+    public Map<String, Object> query(@PathVariable("limit") Integer limit) {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("code", "0");
         result.put("message", "成功");
-        result.put("data", rankingService.query(limit));
+        result.put("result", rankingService.query(limit));
         return result;
     }
 }

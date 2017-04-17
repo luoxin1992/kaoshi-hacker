@@ -13,13 +13,9 @@ import java.io.Serializable;
  */
 public class RankingCompareModel implements Serializable {
     /**
-     * ID
+     * 胖行帮爬取时间
      */
-    private Integer round;
-    /**
-     * 姓名
-     */
-    private String name;
+    private String timestamp;
     /**
      * 排名
      */
@@ -33,20 +29,12 @@ public class RankingCompareModel implements Serializable {
      */
     private String time;
 
-    public Integer getRound() {
-        return round;
+    public String getTimestamp() {
+        return timestamp;
     }
 
-    public void setRound(Integer round) {
-        this.round = round;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getRank() {
@@ -71,13 +59,5 @@ public class RankingCompareModel implements Serializable {
 
     public void setTime(String time) {
         this.time = time;
-    }
-
-    public static RankingCompareModel buildNull() {
-        RankingCompareModel model = new RankingCompareModel();
-        model.setRank("-");
-        model.setScore("-");
-        model.setTime("-");
-        return model;
     }
 }

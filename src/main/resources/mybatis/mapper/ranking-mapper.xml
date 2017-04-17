@@ -19,7 +19,7 @@
 
     <select id="compare" parameterType="java.lang.String"
             resultType="cn.com.lx1992.kaoshi.hacker.model.RankingCompareModel">
-        select `round`, `rank`, `name`, `score`, `time`
+        select `gmt_create` `timestamp`, `rank`, `score`, `time`
         from tbl_ranking
         where `name` = #{name} and `status` = 1
     </select>
