@@ -10,6 +10,8 @@ import cn.com.lx1992.kaoshi.hacker.mapper.MetadataMapper;
 import cn.com.lx1992.kaoshi.hacker.mapper.ScoreMapper;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataUpdateModel;
+import cn.com.lx1992.kaoshi.hacker.model.ScoreAnalyzeModel;
+import cn.com.lx1992.kaoshi.hacker.model.ScoreQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.ScoreSaveModel;
 import cn.com.lx1992.kaoshi.hacker.util.CommonUtils;
 import cn.com.lx1992.kaoshi.hacker.util.DateTimeUtils;
@@ -25,8 +27,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -170,5 +176,81 @@ public class ScoreService {
         int number = CommonUtils.extractNumber(href);
         logger.info("score total page(s) {}", number);
         return number;
+    }
+
+
+    /**
+     * 查询成绩(时间段)
+     */
+    public Map<String, Object> query(String period) {
+        String start = null, end = null;
+        String base = period.substring(0, 4) + "-" + period.substring(4, 6) + "-" + period.substring(6, 8) + " ";
+        if (period.length() == 8) {
+            start = base + "00";
+            end = base + "23";
+        }
+        if (period.length() == 10) {
+            start = base + period.substring(8, 10) + ":" + "00";
+            end = base + period.substring(8, 10) + ":" + "23";
+        }
+        if (period.length() == 12) {
+            start = base + period.substring(8, 10) + ":" + period.substring(10, 12) + ":" + "00";
+            end = base + period.substring(8, 10) + ":" + period.substring(10, 12) + ":" + "59";
+        }
+        List<ScoreQueryModel> models = scoreMapper.queryPeriod(start, end);
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("count", models.size());
+        result.put("data", models);
+        return result;
+    }
+
+    /**
+     * 查询成绩(排序+分页)
+     */
+    public Map<String, Object> query(String column, String dir, Integer page) {
+        if (!"time".equals(column)) {
+            //除时间外其他字段应是数字 但数据库中为字符串 为排序临时处理方案
+            column += "+0";
+        }
+        List<ScoreQueryModel> models = scoreMapper.queryPage(column, dir, (page - 1) * 20);
+        int total = Integer.parseInt(metadataMapper.query(MetadataKeyConstant.SCORE_COUNT).getValue());
+        int count = total % 20 == 0 ? total / 20 : total / 20 + 1;
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("count", count);
+        result.put("data", models);
+        return result;
+    }
+
+    /**
+     * 分析成绩
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> analyze(String period) {
+        List<ScoreQueryModel> data = (List<ScoreQueryModel>) query(period).get("data");
+        List<ScoreAnalyzeModel> models = data.stream()
+                .collect(Collectors.groupingBy((model) -> {
+                    if (period.length() == 8) {
+                        return model.getTime().substring(0, 13);
+                    } else {
+                        return model.getTime().substring(0, 16);
+                    }
+                }))
+                .entrySet().stream()
+                .map((result) -> {
+                    ScoreAnalyzeModel model = new ScoreAnalyzeModel();
+                    model.setTime(result.getKey());
+                    model.setCount(result.getValue().size());
+                    model.setAvgScore(result.getValue().stream()
+                            .collect(Collectors.averagingDouble(value -> Double.parseDouble(value.getScore()))));
+                    model.setAvgPeriod(result.getValue().stream()
+                            .collect(Collectors.averagingDouble(value -> Double.parseDouble(value.getPeriod()))));
+                    return model;
+                })
+                .sorted(Comparator.comparing(ScoreAnalyzeModel::getTime))
+                .collect(Collectors.toList());
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("count", models.size());
+        result.put("data", models);
+        return result;
     }
 }
