@@ -60,8 +60,8 @@ public class PaperService {
         AtomicInteger count = new AtomicInteger(Integer.parseInt(metadataQuery.getValue()));
         metadataQuery = metadataMapper.query(MetadataKeyConstant.PAPER_LAST_CRAWLING_MAX_ID);
         int start = Integer.parseInt(metadataQuery.getValue());
-        //每次随机爬取50份以内试卷
-        int end = start + (int) (Math.random() * 50);
+        //每次随机爬取100份以内试卷
+        int end = start + (int) (Math.random() * 100);
         logger.info("already crawled {} paper(s) with id below {}", count.get(), start);
         //记录爬取开始时间
         MetadataUpdateModel metadataUpdate = new MetadataUpdateModel();
@@ -74,7 +74,7 @@ public class PaperService {
         ids.forEach((id) -> {
             try {
                 //每爬取一份随机休眠0~5秒
-                Thread.sleep((long) (Math.random() * 5000));
+                Thread.sleep((long) (Math.random() * 3000));
             } catch (InterruptedException ignored) {
             }
             //试卷内容
