@@ -8,6 +8,7 @@ import cn.com.lx1992.kaoshi.hacker.mapper.MetadataMapper;
 import cn.com.lx1992.kaoshi.hacker.mapper.QuestionMapper;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataUpdateModel;
+import cn.com.lx1992.kaoshi.hacker.model.QuestionAnalyzeModel;
 import cn.com.lx1992.kaoshi.hacker.model.QuestionQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.QuestionSaveModel;
 import cn.com.lx1992.kaoshi.hacker.model.QuestionUpdateModel;
@@ -19,6 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 试题Service
@@ -91,43 +96,43 @@ public class QuestionService {
             logger.error("question {} not exist", questionId);
             throw new RuntimeException("试题不存在");
         }
-        QuestionQueryModel questionQuery = questionMapper.query(id);
+        QuestionAnalyzeModel questionAnalyze = questionMapper.analyze(id);
         //试题分析
         QuestionUpdateModel questionUpdate = new QuestionUpdateModel();
         questionUpdate.setId(id);
         //试题抽中次数
-        int selectTimes = questionQuery.getSelectTimes() + 1;
+        int selectTimes = questionAnalyze.getSelectTimes() + 1;
         questionUpdate.setSelectTimes(selectTimes);
         //各选项选择人数
         if ("A".equals(choice)) {
-            int aChooser = questionQuery.getaChooser() + 1;
+            int aChooser = questionAnalyze.getaChooser() + 1;
             questionUpdate.setaChooser(aChooser);
         } else if ("B".equals(choice)) {
-            int bChooser = questionQuery.getbChooser() + 1;
+            int bChooser = questionAnalyze.getbChooser() + 1;
             questionUpdate.setbChooser(bChooser);
         } else if ("C".equals(choice)) {
-            int cChooser = questionQuery.getcChooser() + 1;
+            int cChooser = questionAnalyze.getcChooser() + 1;
             questionUpdate.setcChooser(cChooser);
         } else if ("D".equals(choice)) {
-            int dChooser = questionQuery.getdChooser() + 1;
+            int dChooser = questionAnalyze.getdChooser() + 1;
             questionUpdate.setdChooser(dChooser);
         }
-        String answer = questionQuery.getAnswer();
+        String answer = questionAnalyze.getAnswer();
         //正确率 精确到小数点后三位
         if ("A".equals(answer)) {
-            int aChooser = answer.equals(choice) ? questionUpdate.getaChooser() : questionQuery.getaChooser();
+            int aChooser = answer.equals(choice) ? questionUpdate.getaChooser() : questionAnalyze.getaChooser();
             double correctRate = Math.floorDiv(aChooser * 1000, selectTimes);
             questionUpdate.setCorrectRate((int) correctRate);
         } else if ("B".equals(answer)) {
-            int bChooser = answer.equals(choice) ? questionUpdate.getbChooser() : questionQuery.getbChooser();
+            int bChooser = answer.equals(choice) ? questionUpdate.getbChooser() : questionAnalyze.getbChooser();
             double correctRate = Math.floorDiv(bChooser * 1000, selectTimes);
             questionUpdate.setCorrectRate((int) correctRate);
         } else if ("C".equals(answer)) {
-            int cChooser = answer.equals(choice) ? questionUpdate.getcChooser() : questionQuery.getcChooser();
+            int cChooser = answer.equals(choice) ? questionUpdate.getcChooser() : questionAnalyze.getcChooser();
             double correctRate = Math.floorDiv(cChooser * 1000, selectTimes);
             questionUpdate.setCorrectRate((int) correctRate);
         } else if ("D".equals(answer)) {
-            int dChooser = answer.equals(choice) ? questionUpdate.getdChooser() : questionQuery.getdChooser();
+            int dChooser = answer.equals(choice) ? questionUpdate.getdChooser() : questionAnalyze.getdChooser();
             double correctRate = Math.floorDiv(dChooser * 1000, selectTimes);
             questionUpdate.setCorrectRate((int) correctRate);
         }
@@ -135,5 +140,25 @@ public class QuestionService {
         logger.info("update question {}", questionUpdate.getId());
         //返回true-回答正确 false-回答错误
         return answer.equals(choice);
+    }
+
+    public Map<String, Object> query(String keyword) {
+        logger.info("query question(s) match {}", keyword);
+        List<QuestionQueryModel> models = questionMapper.query(keyword);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("count", models.size());
+        result.put("data", models);
+        return result;
+    }
+
+    public QuestionAnalyzeModel analyze(Integer questionId) {
+        logger.info("analyze question {}", questionId);
+        Integer id = questionMapper.queryId(questionId);
+        if (id == null) {
+            logger.warn("question not exist");
+            return null;
+        }
+        return questionMapper.analyze(id);
     }
 }

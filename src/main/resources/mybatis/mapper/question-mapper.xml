@@ -33,20 +33,28 @@
         where `id` = #{id} and `status` = 1
     </update>
 
-    <select id="query" parameterType="java.lang.Integer"
-            resultType="cn.com.lx1992.kaoshi.hacker.model.QuestionQueryModel">
-        select `id`, `question_id` as `questionId`, `stem`, `option`, `answer`,
-            `a_chooser` as `aChooser`, `b_chooser` as `bChooser`, `c_chooser` as `cChooser`, `d_chooser` as `dChooser`,
-            `correct_rate` as `correctRate`, `select_times` as `selectTimes`
-        from tbl_question
-        where `id` = #{id} and `status` = 1
-        limit 1
-    </select>
-
     <select id="queryId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
         select `id`
         from tbl_question
         where `question_id` = #{questionId} and `status` = 1
+        limit 1
+    </select>
+
+    <select id="query" parameterType="java.lang.String"
+            resultType="cn.com.lx1992.kaoshi.hacker.model.QuestionQueryModel">
+        select `question_id` as `questionId`, `stem`, `option`, `answer`,
+            match(`stem`, `option`) against(#{keyword}) as `similarity`
+        from tbl_question
+        where match(`stem`, `option`) against(#{keyword}) and status = 1
+    </select>
+
+    <select id="analyze" parameterType="java.lang.Integer"
+            resultType="cn.com.lx1992.kaoshi.hacker.model.QuestionAnalyzeModel">
+        select `question_id` as `questionId`, `stem`, `option`, `answer`,
+            `a_chooser` as `aChooser`, `b_chooser` as `bChooser`, `c_chooser` as `cChooser`, `d_chooser` as `dChooser`,
+            `correct_rate` as `correctRate`, `select_times` as `selectTimes`
+        from tbl_question
+        where `id` = #{id} and `status` = 1
         limit 1
     </select>
 </mapper>
