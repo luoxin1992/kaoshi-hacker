@@ -24,4 +24,17 @@ public class CommonUtils {
         }
         return Integer.parseInt(matcher.group());
     }
+
+    /**
+     * 从字符串中抽取日期时间
+     */
+    public static String extractDatetime(String str) {
+        //2017-04-09 13:51:20
+        Pattern pattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}");
+        Matcher matcher = pattern.matcher(str);
+        if (!matcher.find()) {
+            return null;
+        }
+        return matcher.group();
+    }
 }

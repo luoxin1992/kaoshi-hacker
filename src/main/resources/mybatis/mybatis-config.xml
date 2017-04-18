@@ -6,6 +6,7 @@
     <mappers>
         <mapper resource="mybatis/mapper/metadata-mapper.xml"/>
         <mapper resource="mybatis/mapper/paper-mapper.xml"/>
+        <mapper resource="mybatis/mapper/paper-question-mapper.xml"/>
         <mapper resource="mybatis/mapper/question-mapper.xml"/>
         <mapper resource="mybatis/mapper/ranking-mapper.xml"/>
         <mapper resource="mybatis/mapper/score-mapper.xml"/>

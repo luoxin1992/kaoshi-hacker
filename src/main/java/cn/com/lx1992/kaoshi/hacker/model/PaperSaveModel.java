@@ -21,10 +21,6 @@ public class PaperSaveModel implements Serializable {
      */
     private Integer paperId;
     /**
-     * 数据
-     */
-    private String data;
-    /**
      * 成绩
      */
     private Integer score;
@@ -43,14 +39,6 @@ public class PaperSaveModel implements Serializable {
 
     public void setPaperId(Integer paperId) {
         this.paperId = paperId;
-    }
-
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
     }
 
     public Integer getScore() {

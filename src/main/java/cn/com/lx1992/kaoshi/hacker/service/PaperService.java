@@ -8,8 +8,12 @@ import cn.com.lx1992.kaoshi.hacker.constant.MetadataKeyConstant;
 import cn.com.lx1992.kaoshi.hacker.constant.UrlConstant;
 import cn.com.lx1992.kaoshi.hacker.mapper.MetadataMapper;
 import cn.com.lx1992.kaoshi.hacker.mapper.PaperMapper;
+import cn.com.lx1992.kaoshi.hacker.mapper.PaperQuestionMapper;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataUpdateModel;
+import cn.com.lx1992.kaoshi.hacker.model.PaperQueryModel;
+import cn.com.lx1992.kaoshi.hacker.model.PaperQuestionQueryModel;
+import cn.com.lx1992.kaoshi.hacker.model.PaperQuestionSaveModel;
 import cn.com.lx1992.kaoshi.hacker.model.PaperSaveModel;
 import cn.com.lx1992.kaoshi.hacker.util.CommonUtils;
 import cn.com.lx1992.kaoshi.hacker.util.DateTimeUtils;
@@ -26,10 +30,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -50,6 +55,8 @@ public class PaperService {
     @Autowired
     private PaperMapper paperMapper;
     @Autowired
+    private PaperQuestionMapper paperQuestionMapper;
+    @Autowired
     private MetadataMapper metadataMapper;
 
     @Transactional
@@ -60,8 +67,8 @@ public class PaperService {
         AtomicInteger count = new AtomicInteger(Integer.parseInt(metadataQuery.getValue()));
         metadataQuery = metadataMapper.query(MetadataKeyConstant.PAPER_LAST_CRAWLING_MAX_ID);
         int start = Integer.parseInt(metadataQuery.getValue());
-        //每次随机爬取100份以内试卷
-        int end = start + (int) (Math.random() * 100);
+        //每次随机爬取200份以内试卷
+        int end = start + (int) (Math.random() * 200);
         logger.info("already crawled {} paper(s) with id below {}", count.get(), start);
         //记录爬取开始时间
         MetadataUpdateModel metadataUpdate = new MetadataUpdateModel();
@@ -73,12 +80,12 @@ public class PaperService {
         IntStream ids = IntStream.range(start, end);
         ids.forEach((id) -> {
             try {
-                //每爬取一份随机休眠0~5秒
+                //每爬取一份随机休眠0~3秒
                 Thread.sleep((long) (Math.random() * 3000));
             } catch (InterruptedException ignored) {
             }
             //试卷内容
-            ConcurrentHashMap<Integer, String> result = parsePaper(requestData(id));
+            ConcurrentHashMap<Integer, List<String>> result = parsePaper(requestData(id));
             if (CollectionUtils.isEmpty(result)) {
                 logger.warn("paper has no result, maybe not exist");
                 return;
@@ -122,9 +129,9 @@ public class PaperService {
         }
     }
 
-    private ConcurrentHashMap<Integer, String> parsePaper(String data) {
+    private ConcurrentHashMap<Integer, List<String>> parsePaper(String data) {
         //作答情况
-        ConcurrentHashMap<Integer, String> result = new ConcurrentHashMap<>();
+        ConcurrentHashMap<Integer, List<String>> result = new ConcurrentHashMap<>();
         //解析试卷
         Document document = Jsoup.parse(data);
         Elements elements = document.body().getElementsByClass("paperexamcontent");
@@ -145,30 +152,52 @@ public class PaperService {
                 logger.warn("question answer & analysis size {} incorrect", item.size());
                 return;
             }
-            String choice = item.get(4).text();
-            result.put(id, choice);
+            List<String> paperQuestion = new ArrayList<>();
+            //考试答案
+            paperQuestion.add(item.get(4).text());
+            //作答时间
+            paperQuestion.add(CommonUtils.extractDatetime(item.get(0).text()));
+            result.put(id, paperQuestion);
         }));
         return result;
     }
 
-    private void analysisPaper(int paperId, ConcurrentHashMap<Integer, String> results) {
+    private void analysisPaper(int paperId, ConcurrentHashMap<Integer, List<String>> results) {
         //成绩
         AtomicInteger score = new AtomicInteger(0);
         //分析试题
         results.forEach((key, value) -> {
-            if (questionService.analysisQuestion(key, value)) {
+            if (questionService.analysisQuestion(key, value.get(0))) {
                 score.incrementAndGet();
             }
         });
+        //保存试卷-试题
+        results.forEach((key, value) -> {
+            PaperQuestionSaveModel paperQuestionSave = new PaperQuestionSaveModel();
+            paperQuestionSave.setPaperId(paperId);
+            paperQuestionSave.setQuestionId(key);
+            paperQuestionSave.setChoice(value.get(0));
+            paperQuestionSave.setTime(value.get(1));
+            paperQuestionMapper.save(paperQuestionSave);
+            logger.info("save paper-question {}", paperQuestionSave.getId());
+        });
         //保存试卷
-        String resultData = results.entrySet().stream()
-                .map((result) -> result.getKey() + "=" + result.getValue())
-                .collect(Collectors.joining(",", "[", "]"));
         PaperSaveModel paperSave = new PaperSaveModel();
         paperSave.setPaperId(paperId);
-        paperSave.setData(resultData);
         paperSave.setScore(score.get());
         paperMapper.save(paperSave);
         logger.info("save paper {}", paperSave.getId());
+    }
+
+    public PaperQueryModel query(Integer paperId) {
+        logger.info("query paper {}", paperId);
+        List<PaperQuestionQueryModel> paperQuestionQuery = paperQuestionMapper.query(paperId);
+        if (CollectionUtils.isEmpty(paperQuestionQuery)) {
+            logger.warn("paper not exist");
+            return null;
+        }
+        PaperQueryModel paperQuery = paperMapper.query(paperId);
+        paperQuery.setQuestions(paperQuestionQuery);
+        return paperQuery;
     }
 }

@@ -3,6 +3,7 @@
  */
 package cn.com.lx1992.kaoshi.hacker.mapper;
 
+import cn.com.lx1992.kaoshi.hacker.model.PaperQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.PaperSaveModel;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -18,4 +19,9 @@ public interface PaperMapper {
      * 保存
      */
     int save(PaperSaveModel model);
+
+    /**
+     * 查询
+     */
+    PaperQueryModel query(Integer paperId);
 }

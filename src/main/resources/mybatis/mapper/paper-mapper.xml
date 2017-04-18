@@ -5,7 +5,13 @@
 <mapper namespace="cn.com.lx1992.kaoshi.hacker.mapper.PaperMapper">
     <insert id="save" parameterType="cn.com.lx1992.kaoshi.hacker.model.PaperSaveModel" useGeneratedKeys="true"
             keyProperty="id">
-        insert into tbl_paper(`paper_id`, `data`, `score`, `gmt_create`, `gmt_modify`)
-        values(#{paperId}, #{data}, #{score}, now(), now())
+        insert into tbl_paper(`paper_id`, `score`, `gmt_create`, `gmt_modify`)
+        values(#{paperId}, #{score}, now(), now())
     </insert>
+
+    <select id="query" parameterType="java.lang.Integer" resultType="cn.com.lx1992.kaoshi.hacker.model.PaperQueryModel">
+        select `score`
+        from tbl_paper
+        where paper_id = #{paperId} and status = 1
+    </select>
 </mapper>

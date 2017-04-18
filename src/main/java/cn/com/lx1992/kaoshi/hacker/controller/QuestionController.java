@@ -39,6 +39,12 @@ public class QuestionController {
     @RequestMapping("/api/v1/question/analyze/{id}")
     public Map<String, Object> analyze(@PathVariable("id") Integer questionId) {
         Map<String, Object> result = new LinkedHashMap<>();
+        if (questionId <= 0) {
+            result.put("code", "-1");
+            result.put("message", "试题ID应为正数");
+            result.put("result", null);
+            return result;
+        }
         result.put("code", "0");
         result.put("message", "成功");
         result.put("result", questionService.analyze(questionId));
