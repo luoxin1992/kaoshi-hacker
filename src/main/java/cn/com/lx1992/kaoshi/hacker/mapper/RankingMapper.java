@@ -27,7 +27,7 @@ public interface RankingMapper {
     /**
      * 查询
      */
-    List<RankingQueryModel> query(@Param("round") int round, @Param("limit") int limit);
+    List<RankingQueryModel> query(@Param("count") int count, @Param("limit") int limit);
 
     /**
      * 对比

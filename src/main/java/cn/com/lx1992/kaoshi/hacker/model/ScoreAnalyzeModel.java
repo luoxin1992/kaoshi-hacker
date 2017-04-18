@@ -27,7 +27,7 @@ public class ScoreAnalyzeModel implements Serializable {
     /**
      * 平均用时
      */
-    private Double avgPeriod;
+    private Double avgTimeCost;
 
     public String getTime() {
         return time;
@@ -53,11 +53,11 @@ public class ScoreAnalyzeModel implements Serializable {
         this.avgScore = avgScore;
     }
 
-    public Double getAvgPeriod() {
-        return avgPeriod;
+    public Double getAvgTimeCost() {
+        return avgTimeCost;
     }
 
-    public void setAvgPeriod(Double avgPeriod) {
-        this.avgPeriod = avgPeriod;
+    public void setAvgTimeCost(Double avgTimeCost) {
+        this.avgTimeCost = avgTimeCost;
     }
 }

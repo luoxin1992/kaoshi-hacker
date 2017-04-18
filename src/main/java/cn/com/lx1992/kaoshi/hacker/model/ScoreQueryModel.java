@@ -27,7 +27,7 @@ public class ScoreQueryModel implements Serializable {
     /**
      * 用时
      */
-    private String period;
+    private String timeCost;
 
     public String getName() {
         return name;
@@ -53,11 +53,11 @@ public class ScoreQueryModel implements Serializable {
         this.time = time;
     }
 
-    public String getPeriod() {
-        return period;
+    public String getTimeCost() {
+        return timeCost;
     }
 
-    public void setPeriod(String period) {
-        this.period = period;
+    public void setTimeCost(String timeCost) {
+        this.timeCost = timeCost;
     }
 }

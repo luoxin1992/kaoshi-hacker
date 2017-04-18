@@ -7,7 +7,6 @@ import cn.com.lx1992.kaoshi.hacker.constant.MetadataKeyConstant;
 import cn.com.lx1992.kaoshi.hacker.constant.UrlConstant;
 import cn.com.lx1992.kaoshi.hacker.mapper.MetadataMapper;
 import cn.com.lx1992.kaoshi.hacker.mapper.RankingMapper;
-import cn.com.lx1992.kaoshi.hacker.model.MetadataQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.MetadataUpdateModel;
 import cn.com.lx1992.kaoshi.hacker.model.RankingCompareModel;
 import cn.com.lx1992.kaoshi.hacker.model.RankingQueryModel;
@@ -66,8 +65,6 @@ public class RankingService {
     private void parseData(String data) {
         //上榜人数
         AtomicInteger count = new AtomicInteger(0);
-        //爬取轮次
-        MetadataQueryModel metadataQuery = metadataMapper.query(MetadataKeyConstant.RANKING_NEXT_ROUND);
         //解析数据
         Document document = Jsoup.parse(data);
         Elements elements = document.body().select("table").first().select("tr");
@@ -83,7 +80,6 @@ public class RankingService {
                     }
                     //保存排行榜
                     RankingSaveModel rankingSave = new RankingSaveModel();
-                    rankingSave.setRound(Integer.valueOf(metadataQuery.getValue()));
                     rankingSave.setRank(item.get(0).html());
                     rankingSave.setName(item.get(1).html());
                     rankingSave.setScore(item.get(2).html());
@@ -102,9 +98,6 @@ public class RankingService {
         metadataUpdate.setKey(MetadataKeyConstant.RANKING_COUNT);
         metadataUpdate.setValue(String.valueOf(count.get()));
         metadataMapper.update(metadataUpdate);
-        metadataUpdate.setKey(MetadataKeyConstant.RANKING_NEXT_ROUND);
-        metadataUpdate.setValue(String.valueOf(Integer.parseInt(metadataQuery.getValue()) + 1));
-        metadataMapper.update(metadataUpdate);
     }
 
     /**
@@ -113,11 +106,11 @@ public class RankingService {
     public Map<String, Object> query(Integer limit) {
         logger.info("query ranking in top {}", limit == null ? "[all]" : limit);
         //排行榜
-        int round = Integer.parseInt(metadataMapper.query(MetadataKeyConstant.RANKING_NEXT_ROUND).getValue()) - 1;
-        if (limit == null) {
-            limit = Integer.valueOf(metadataMapper.query(MetadataKeyConstant.RANKING_COUNT).getValue());
+        int count = Integer.valueOf(metadataMapper.query(MetadataKeyConstant.RANKING_COUNT).getValue());
+        if (limit == null || limit <= 0 || limit > count) {
+            limit = count;
         }
-        List<RankingQueryModel> models = rankingMapper.query(round, limit);
+        List<RankingQueryModel> models = rankingMapper.query(count, limit);
         if (CollectionUtils.isEmpty(models)) {
             logger.warn("ranking result is empty");
             return null;

@@ -5,18 +5,18 @@
 <mapper namespace="cn.com.lx1992.kaoshi.hacker.mapper.ScoreMapper">
     <insert id="save" parameterType="cn.com.lx1992.kaoshi.hacker.model.ScoreSaveModel" useGeneratedKeys="true"
             keyProperty="id">
-        insert into tbl_score(`name`, `score`, `time`, `period`, `gmt_create`, `gmt_modify`)
-        values (#{name}, #{score}, #{time}, #{period}, now(), now())
+        insert into tbl_score(`name`, `score`, `time`, `time_cost`, `gmt_create`, `gmt_modify`)
+        values (#{name}, #{score}, #{time}, #{timeCost}, now(), now())
     </insert>
 
     <select id="queryPeriod" resultType="cn.com.lx1992.kaoshi.hacker.model.ScoreQueryModel">
-        select `name`, `score`, `time`, `period`
+        select `name`, `score`, `time`, `time_cost` as `timeCost`
         from tbl_score
         where `time` >= #{start} and #{end} > `time` and `status` = 1
     </select>
 
     <select id="queryPage" resultType="cn.com.lx1992.kaoshi.hacker.model.ScoreQueryModel">
-        select `name`, `score`, `time`, `period`
+        select `name`, `score`, `time`, `time_cost` as `timeCost`
         from tbl_score
         where `status` = 1
         order by ${column} ${dir}

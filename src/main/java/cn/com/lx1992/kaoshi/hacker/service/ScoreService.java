@@ -154,12 +154,12 @@ public class ScoreService {
                     scoreSave.setScore(item.get(2).html());
                     scoreSave.setTime(item.get(3).html());
                     //页面上的"用时"格式为"XX秒"或"XX分" 爬取时统一用秒 去掉文字单位
-                    String periodStr = item.get(4).html();
-                    int periodNum = CommonUtils.extractNumber(periodStr);
-                    if (periodStr.contains("分钟")) {
-                        periodNum *= 60;
+                    String timeCostStr = item.get(4).html();
+                    int timeCostNum = CommonUtils.extractNumber(timeCostStr);
+                    if (timeCostStr.contains("分钟")) {
+                        timeCostNum *= 60;
                     }
-                    scoreSave.setPeriod(String.valueOf(periodNum));
+                    scoreSave.setTimeCost(String.valueOf(timeCostNum));
                     scoreMapper.save(scoreSave);
                     logger.info("save score item {}", scoreSave.getId());
                     count.incrementAndGet();
@@ -256,8 +256,8 @@ public class ScoreService {
                     model.setCount(result.getValue().size());
                     model.setAvgScore(result.getValue().stream()
                             .collect(Collectors.averagingDouble(value -> Double.parseDouble(value.getScore()))));
-                    model.setAvgPeriod(result.getValue().stream()
-                            .collect(Collectors.averagingDouble(value -> Double.parseDouble(value.getPeriod()))));
+                    model.setAvgTimeCost(result.getValue().stream()
+                            .collect(Collectors.averagingDouble(value -> Double.parseDouble(value.getTimeCost()))));
                     return model;
                 })
                 .sorted(Comparator.comparing(ScoreAnalyzeModel::getTime))

@@ -31,7 +31,7 @@ public class ScoreSaveModel implements Serializable {
     /**
      * 用时
      */
-    private String period;
+    private String timeCost;
 
     public Integer getId() {
         return id;
@@ -65,11 +65,11 @@ public class ScoreSaveModel implements Serializable {
         this.time = time;
     }
 
-    public String getPeriod() {
-        return period;
+    public String getTimeCost() {
+        return timeCost;
     }
 
-    public void setPeriod(String period) {
-        this.period = period;
+    public void setTimeCost(String timeCost) {
+        this.timeCost = timeCost;
     }
 }
