@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 成绩单定时任务
- * 调度频率 从03:45:00开始每12小时一次
+ * 调度频率 从00:00:00开始每12小时一次
  *
  * @author luoxin
  * @version 2017-4-13
@@ -25,7 +25,7 @@ public class ScoreJob {
     @Autowired
     private ScoreService scoreService;
 
-    @Scheduled(cron = "0 45 3/12 * * ?")
+    @Scheduled(cron = "0 0 0/12 * * ?")
     public void execute() {
         logger.info("score crawling job start at {}", DateTimeUtils.getNowStr());
         scoreService.crawling();

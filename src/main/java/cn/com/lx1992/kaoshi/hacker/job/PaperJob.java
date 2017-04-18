@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 试卷定时任务
- * 调度频率 从00:00:00开始每30分钟一次
+ * 调度频率 从00:15:00开始每30分钟一次
  *
  * @author luoxin
  * @version 2017-4-13
@@ -25,7 +25,7 @@ public class PaperJob {
     @Autowired
     private PaperService paperService;
 
-    @Scheduled(cron = "0 0/30 * * * ?")
+    @Scheduled(cron = "0 15/30 * * * ?")
     public void execute() {
         logger.info("paper crawling job start at {}", DateTimeUtils.getNowStr());
         paperService.crawling();
