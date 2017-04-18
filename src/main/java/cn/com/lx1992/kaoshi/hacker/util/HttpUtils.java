@@ -10,8 +10,6 @@ import okhttp3.Response;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -31,7 +29,7 @@ public class HttpUtils {
                 .readTimeout(10, TimeUnit.SECONDS)
                 .followRedirects(false)
                 //本地调试用Charles代理
-                .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8888)))
+                //.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8888)))
                 .build();
     }
 

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="log_path" value="./logs"/>
+    <property name="log_pattern" value="%d %-5p %c [%t] - %m%n"/>
+
+    <!-- 控制台 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+    <!-- job.log文件 -->
+    <appender name="JOB_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_path}/job.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+    <!-- paper.log文件 -->
+    <appender name="PAPER_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_path}/paper.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+    <!-- question.log文件 -->
+    <appender name="QUESTION_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_path}/question.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+    <!-- ranking.log文件 -->
+    <appender name="RANKING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_path}/ranking.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+    <!-- score.log文件 -->
+    <appender name="SCORE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_path}/score.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+    <!-- user.log文件 -->
+    <appender name="USER_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_path}/user.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+    <!-- root.log文件 -->
+    <appender name="ROOT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_path}/root.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="cn.com.lx1992.kaoshi.hacker.job" level="INFO">
+        <appender-ref ref="JOB_FILE"/>
+    </logger>
+    <logger name="cn.com.lx1992.kaoshi.hacker.service.PaperService" level="INFO">
+        <appender-ref ref="PAPER_FILE"/>
+    </logger>
+    <logger name="cn.com.lx1992.kaoshi.hacker.service.QuestionService" level="INFO">
+        <appender-ref ref="QUESTION_FILE"/>
+    </logger>
+    <logger name="cn.com.lx1992.kaoshi.hacker.service.RankingService" level="INFO">
+        <appender-ref ref="RANKING_FILE"/>
+    </logger>
+    <logger name="cn.com.lx1992.kaoshi.hacker.service.ScoreService" level="INFO">
+        <appender-ref ref="SCORE_FILE"/>
+    </logger>
+    <logger name="cn.com.lx1992.kaoshi.hacker.service.UserService" level="INFO">
+        <appender-ref ref="USER_FILE"/>
+    </logger>
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="ROOT_FILE"/>
+    </root>
+</configuration>
