@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -183,21 +184,32 @@ public class ScoreService {
      * 查询成绩(时间段)
      */
     public Map<String, Object> query(String period) {
+        logger.info("query score(s) in {}", period);
         String start = null, end = null;
-        String base = period.substring(0, 4) + "-" + period.substring(4, 6) + "-" + period.substring(6, 8) + " ";
+        //日期部分 yyyy-MM-dd
+        String base = period.substring(0, 4) + "-" + period.substring(4, 6) + "-" + period.substring(6, 8);
         if (period.length() == 8) {
-            start = base + "00";
-            end = base + "23";
+            //按日期查询 范围 >=给定日期 <给定日期下一天
+            start = base;
+            end = base.substring(0, 9) + (Integer.parseInt(period.substring(7, 8)) + 1);
         }
         if (period.length() == 10) {
-            start = base + period.substring(8, 10) + ":" + "00";
-            end = base + period.substring(8, 10) + ":" + "23";
+            //按小时查询 范围 >=给定小时 <给定小时的下一小时
+            base += " ";
+            start = base + period.substring(8, 10);
+            end = base + period.substring(8, 9) + (Integer.parseInt(period.substring(9, 10)) + 1);
         }
         if (period.length() == 12) {
-            start = base + period.substring(8, 10) + ":" + period.substring(10, 12) + ":" + "00";
-            end = base + period.substring(8, 10) + ":" + period.substring(10, 12) + ":" + "59";
+            //按分钟查询 范围 >=给定分钟 <给定分钟的下一分钟
+            base += " " + period.substring(8, 10) + ":";
+            start = base + period.substring(10, 12);
+            end = base + period.substring(10, 11) + (Integer.parseInt(period.substring(11, 12)) + 1);
         }
         List<ScoreQueryModel> models = scoreMapper.queryPeriod(start, end);
+        if (CollectionUtils.isEmpty(models)) {
+            logger.warn("score result is empty");
+            return null;
+        }
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("count", models.size());
         result.put("data", models);
@@ -208,6 +220,7 @@ public class ScoreService {
      * 查询成绩(排序+分页)
      */
     public Map<String, Object> query(String column, String dir, Integer page) {
+        logger.info("query all score(s) sort by {} {} in page {}", column, dir, page);
         if (!"time".equals(column)) {
             //除时间外其他字段应是数字 但数据库中为字符串 为排序临时处理方案
             column += "+0";
@@ -226,6 +239,7 @@ public class ScoreService {
      */
     @SuppressWarnings("unchecked")
     public Map<String, Object> analyze(String period) {
+        logger.info("analyze score(s) in {}", period);
         List<ScoreQueryModel> data = (List<ScoreQueryModel>) query(period).get("data");
         List<ScoreAnalyzeModel> models = data.stream()
                 .collect(Collectors.groupingBy((model) -> {

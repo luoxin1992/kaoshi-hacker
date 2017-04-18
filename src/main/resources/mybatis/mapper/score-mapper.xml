@@ -12,7 +12,7 @@
     <select id="queryPeriod" resultType="cn.com.lx1992.kaoshi.hacker.model.ScoreQueryModel">
         select `name`, `score`, `time`, `period`
         from tbl_score
-        where `time` >= #{start} and #{end} >= `time` and `status` = 1
+        where `time` >= #{start} and #{end} > `time` and `status` = 1
     </select>
 
     <select id="queryPage" resultType="cn.com.lx1992.kaoshi.hacker.model.ScoreQueryModel">
@@ -21,23 +21,5 @@
         where `status` = 1
         order by ${column} ${dir}
         limit ${offset}, 20
-    </select>
-
-    <select id="analyze" resultType="cn.com.lx1992.kaoshi.hacker.model.ScoreAnalyzeModel">
-        select
-        <if test="type == 1">
-            left(`time`, 10) `time`, count(1) `count`, avg(score) `avgScore`, avg(period) `avgPeriod`
-        </if>
-        <if test="type == 2">
-            left(`time`, 10) `time`, count(1) `count`, avg(score) `avgScore`, avg(period) `avgPeriod`
-        </if>
-        from tbl_score
-        where `time` >= #{start} and #{end} >= `time` and `status` = 1
-        <if test="type == 1">
-            group by left(`time`, 10)
-        </if>
-        <if test="type == 2">
-            group by left(`time`, 10)
-        </if>
     </select>
 </mapper>

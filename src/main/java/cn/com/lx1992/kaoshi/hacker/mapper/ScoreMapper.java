@@ -3,7 +3,6 @@
  */
 package cn.com.lx1992.kaoshi.hacker.mapper;
 
-import cn.com.lx1992.kaoshi.hacker.model.ScoreAnalyzeModel;
 import cn.com.lx1992.kaoshi.hacker.model.ScoreQueryModel;
 import cn.com.lx1992.kaoshi.hacker.model.ScoreSaveModel;
 import org.apache.ibatis.annotations.Mapper;
@@ -34,9 +33,4 @@ public interface ScoreMapper {
      */
     List<ScoreQueryModel> queryPage(@Param("column") String column, @Param("dir") String dir,
                                     @Param("offset") int offset);
-
-    /**
-     * 分析
-     */
-    List<ScoreAnalyzeModel> analyze(@Param("type") int type, @Param("start") String start, @Param("end") String end);
 }
