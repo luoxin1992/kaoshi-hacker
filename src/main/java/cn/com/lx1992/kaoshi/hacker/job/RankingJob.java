@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 排行榜定时任务
+ * 调度频率 从00:15:00开始每6小时一次
  *
  * @author luoxin
  * @version 2017-4-13
@@ -24,7 +25,7 @@ public class RankingJob {
     @Autowired
     private RankingService rankingService;
 
-    @Scheduled(cron = "0 0 0/6 * * ?")
+    @Scheduled(cron = "0 15 0/6 * * ?")
     public void execute() {
         logger.info("ranking crawling job start at {}", DateTimeUtils.getNowStr());
         rankingService.crawling();

@@ -13,7 +13,7 @@ public class UrlConstant {
     /**
      * URL前缀
      */
-    public static final String PREFIX = "http://www.aohua168.com/kaoshi";
+    private static final String PREFIX = "http://www.aohua168.com/kaoshi";
     /**
      * 排行榜
      */
